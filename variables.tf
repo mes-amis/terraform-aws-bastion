@@ -68,6 +68,12 @@ variable "bastion_additional_security_groups" {
   default     = []
 }
 
+variable "create_security_groups" {
+  description = "Generate security groups for the bastion. If false, you'll define all your own."
+  type        = bool
+  default     = true
+}
+
 variable "bastion_ami" {
   type        = string
   description = "The AMI that the Bastion Host will use."

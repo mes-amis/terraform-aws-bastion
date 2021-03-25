@@ -76,7 +76,7 @@ resource "aws_s3_bucket_object" "bucket_public_keys_readme" {
 }
 
 resource "aws_security_group" "bastion_host_security_group" {
-  count       = var.bastion_security_group_id == "" ? 1 : 0
+  count       = var.create_security_groups ? (var.bastion_security_group_id == "" ? 1 : 0) : 0
   description = "Enable SSH access to the bastion host from external via SSH port"
   name        = "${local.name_prefix}-host"
   vpc_id      = var.vpc_id
@@ -85,7 +85,7 @@ resource "aws_security_group" "bastion_host_security_group" {
 }
 
 resource "aws_security_group_rule" "ingress_bastion" {
-  count       = var.bastion_security_group_id == "" ? 1 : 0
+  count       = var.create_security_groups ? (var.bastion_security_group_id == "" ? 1 : 0) : 0
   description = "Incoming traffic to bastion"
   type        = "ingress"
   from_port   = var.public_ssh_port
@@ -97,7 +97,7 @@ resource "aws_security_group_rule" "ingress_bastion" {
 }
 
 resource "aws_security_group_rule" "egress_bastion" {
-  count       = var.bastion_security_group_id == "" ? 1 : 0
+  count       = var.create_security_groups ? (var.bastion_security_group_id == "" ? 1 : 0) : 0
   description = "Outgoing traffic from bastion to instances"
   type        = "egress"
   from_port   = "0"
@@ -109,6 +109,7 @@ resource "aws_security_group_rule" "egress_bastion" {
 }
 
 resource "aws_security_group" "private_instances_security_group" {
+  count       = var.create_security_groups ? 1 : 0
   description = "Enable SSH access to the Private instances from the bastion via SSH port"
   name        = "${local.name_prefix}-priv-instances"
   vpc_id      = var.vpc_id
@@ -117,6 +118,7 @@ resource "aws_security_group" "private_instances_security_group" {
 }
 
 resource "aws_security_group_rule" "ingress_instances" {
+  count       = var.create_security_groups ? 1 : 0
   description = "Incoming traffic from bastion"
   type        = "ingress"
   from_port   = var.private_ssh_port
@@ -125,7 +127,7 @@ resource "aws_security_group_rule" "ingress_instances" {
 
   source_security_group_id = local.security_group
 
-  security_group_id = aws_security_group.private_instances_security_group.id
+  security_group_id = var.create_security_groups ? aws_security_group.private_instances_security_group[*].id : 0
 }
 
 data "aws_iam_policy_document" "assume_policy_document" {
