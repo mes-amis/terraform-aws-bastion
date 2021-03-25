@@ -45,7 +45,7 @@ output "elb_ip" {
 
 output "private_instances_security_group" {
   description = "The ID of the security group for private instances"
-  value       = aws_security_group.private_instances_security_group.id
+  value       = try(aws_security_group.private_instances_security_group[0].id, "Disabled by TF var.create_security_groups")
 }
 
 output "target_group_arn" {

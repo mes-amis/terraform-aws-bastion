@@ -145,6 +145,12 @@ variable "enable_logs_s3_sync" {
   default     = true
 }
 
+variable "create_security_groups" {
+  description = "Generate security groups for the bastion. If false, you'll define all your own."
+  type        = bool
+  default     = true
+}
+
 variable "extra_user_data_content" {
   type        = string
   description = "Additional scripting to pass to the bastion host. For example, this can include installing PostgreSQL for the `psql` command."
