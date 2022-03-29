@@ -380,3 +380,20 @@ resource "aws_autoscaling_group" "bastion_auto_scaling_group" {
 
   depends_on = [aws_s3_bucket.bucket]
 }
+
+resource "aws_cloudwatch_metric_alarm" "bastion_cpu" {
+  alarm_name          = "${local.name_prefix}-cpu"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "20"
+
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.bastion_auto_scaling_group.name
+  }
+
+  alarm_description = "This metric monitors ssh bastion cpu utilization"
+}
