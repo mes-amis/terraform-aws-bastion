@@ -374,6 +374,11 @@ resource "aws_autoscaling_group" "bastion_auto_scaling_group" {
     strategy = "Rolling"
   }
 
+  tag {
+    key                 = "Name"
+    value               = "ASG-${local.name_prefix}"
+    propagate_at_launch = true
+  }
   lifecycle {
     create_before_destroy = true
   }
