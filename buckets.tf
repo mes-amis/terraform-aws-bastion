@@ -64,9 +64,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket" {
   }
 }
 
-resource "aws_s3_object" "bucket_public_keys_readme" {
-  bucket     = aws_s3_bucket.bucket.id
-  key        = "public-keys/README.txt"
-  content    = "Drop here the ssh public keys of the instances you want to control"
-  kms_key_id = aws_kms_key.key.arn
+resource "aws_s3_bucket_public_access_block" "bucket" {
+  bucket                  = aws_s3_bucket.bucket.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
