@@ -1,7 +1,7 @@
 data "aws_ami" "amazon-linux-2" {
   most_recent = true
   owners      = ["amazon"]
-  name_regex  = "^amzn2-ami-hvm.*-ebs"
+  name_regex  = "^al2023-ami-kernel-default-x86_64"
 
   filter {
     name   = "architecture"
