@@ -191,6 +191,13 @@ chmod 700 /usr/bin/bastion/yum_update
 ## SCHEDULE SCRIPTS AND SECURITY UPDATES ##
 ###########################################
 
+# sometimes we need cron (amazon linux 2023)
+if [ ! -f /usr/bin/crontab ]; then
+ yum install cronie -y
+ systemctl enable crond.service
+ sudo systemctl start crond.service
+fi
+
 cat > ~/mycron << EOF
 */5 * * * * /usr/bin/bastion/sync_users
 0 0 * * * /usr/bin/bastion/yum_update
