@@ -1,7 +1,7 @@
-data "aws_ami" "amazon-linux-2" {
+data "aws_ami" "amazon-linux" {
   most_recent = true
   owners      = ["amazon"]
-  name_regex  = "^amzn2-ami-hvm.*-ebs"
+  name_regex  = "al2023-ami-minimal.*"
 
   filter {
     name   = "architecture"

@@ -215,7 +215,7 @@ resource "aws_iam_instance_profile" "bastion_host_profile" {
 
 resource "aws_launch_template" "bastion_launch_template" {
   name_prefix            = local.name_prefix
-  image_id               = var.bastion_ami != "" ? var.bastion_ami : data.aws_ami.amazon-linux-2.id
+  image_id               = var.bastion_ami != "" ? var.bastion_ami : data.aws_ami.amazon-linux.id
   instance_type          = var.instance_type
   update_default_version = true
   monitoring {
