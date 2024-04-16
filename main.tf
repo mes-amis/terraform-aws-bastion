@@ -85,6 +85,16 @@ data "aws_iam_policy_document" "assume_policy_document" {
       identifiers = ["ec2.amazonaws.com"]
     }
   }
+
+  statement {
+    actions = [
+      "sts:AssumeRole"
+    ]
+    principals {
+      type        = "Service"
+      identifiers = ["ssm.amazonaws.com"]
+    }
+  }
 }
 
 resource "aws_iam_role" "bastion_host_role" {
@@ -143,6 +153,11 @@ resource "aws_iam_policy" "bastion_host_policy" {
 
 resource "aws_iam_role_policy_attachment" "bastion_host" {
   policy_arn = aws_iam_policy.bastion_host_policy.arn
+  role       = aws_iam_role.bastion_host_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_instance_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   role       = aws_iam_role.bastion_host_role.name
 }
 
