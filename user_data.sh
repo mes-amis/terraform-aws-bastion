@@ -236,6 +236,8 @@ EOF
 crontab ~/mycron
 rm ~/mycron
 
+# install amazon system manager
+sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 
 #########################################
 ## Add Custom extra_user_data_content ##
