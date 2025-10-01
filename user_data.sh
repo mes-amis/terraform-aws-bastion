@@ -13,6 +13,9 @@ chown ec2-user:ec2-user /var/log/bastion
 chmod -R 770 /var/log/bastion
 setfacl -Rdm other:0 /var/log/bastion
 
+# Enable TCP Keepalive
+sed -i "s/#TCPKeepAlive yes/TCPKeepAlive yes/g" /etc/ssh/sshd_config
+
 # Update sshd default port to public_ssh_port
 sed -i "s/#Port 22/Port ${public_ssh_port}/g" /etc/ssh/sshd_config
 
@@ -238,6 +241,52 @@ rm ~/mycron
 
 # install amazon system manager
 sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+
+#################################
+## PERSIST SSH HOST KEYS TO S3 ##
+#################################
+
+# SSH host keys should be consistent across bastion instances in the Auto Scaling Group
+# to prevent "host key changed" warnings for users.
+
+HOST_KEYS=(
+  "/etc/ssh/ssh_host_ed25519_key"
+  "/etc/ssh/ssh_host_rsa_key"
+  "/etc/ssh/ssh_host_ecdsa_key"
+)
+
+# Try to download existing host keys from S3
+for KEY in "$${HOST_KEYS[@]}"; do
+  KEY_NAME=$(basename $KEY)
+
+  # Check if key exists in S3
+  if aws s3 ls s3://${bucket_name}/sshd_keys/$KEY_NAME --region ${aws_region} >/dev/null 2>&1; then
+    # Download existing keys from S3
+    aws s3 cp s3://${bucket_name}/sshd_keys/$KEY_NAME $KEY --region ${aws_region}
+    aws s3 cp s3://${bucket_name}/sshd_keys/$KEY_NAME.pub $KEY.pub --region ${aws_region}
+
+    # Set correct permissions
+    chmod 600 $KEY
+    chmod 644 $KEY.pub
+    chown root:root $KEY $KEY.pub
+  fi
+done
+
+# Regenerate any missing host keys
+ssh-keygen -A
+
+# Upload all host keys to S3 (will overwrite if they already exist)
+for KEY in "$${HOST_KEYS[@]}"; do
+  KEY_NAME=$(basename $KEY)
+
+  if [ -f $KEY ]; then
+    aws s3 cp $KEY s3://${bucket_name}/sshd_keys/$KEY_NAME --sse --region ${aws_region}
+    aws s3 cp $KEY.pub s3://${bucket_name}/sshd_keys/$KEY_NAME.pub --sse --region ${aws_region}
+  fi
+done
+
+# Restart the SSH service to use keys from S3 if they exist.
+service sshd restart
 
 #########################################
 ## Add Custom extra_user_data_content ##
