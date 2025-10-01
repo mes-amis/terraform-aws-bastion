@@ -275,13 +275,16 @@ done
 # Regenerate any missing host keys
 ssh-keygen -A
 
-# Upload all host keys to S3 (will overwrite if they already exist)
+# Upload host keys to S3 only if they don't already exist
 for KEY in "$${HOST_KEYS[@]}"; do
   KEY_NAME=$(basename $KEY)
 
   if [ -f $KEY ]; then
-    aws s3 cp $KEY s3://${bucket_name}/sshd_keys/$KEY_NAME --sse --region ${aws_region}
-    aws s3 cp $KEY.pub s3://${bucket_name}/sshd_keys/$KEY_NAME.pub --sse --region ${aws_region}
+    # Only upload if key doesn't exist in S3
+    if ! aws s3 ls s3://${bucket_name}/sshd_keys/$KEY_NAME --region ${aws_region} >/dev/null 2>&1; then
+      aws s3 cp $KEY s3://${bucket_name}/sshd_keys/$KEY_NAME --sse --region ${aws_region}
+      aws s3 cp $KEY.pub s3://${bucket_name}/sshd_keys/$KEY_NAME.pub --sse --region ${aws_region}
+    fi
   fi
 done
 
