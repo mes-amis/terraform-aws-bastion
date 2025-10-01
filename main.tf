@@ -152,8 +152,8 @@ data "aws_iam_policy_document" "bastion_host_policy_document" {
     aws_s3_bucket.bucket.arn]
 
     condition {
-      test     = "ForAnyValue:StringEquals"
-      values   = ["sshd_keys/"]
+      test     = "StringLike"
+      values   = ["sshd_keys/*"]
       variable = "s3:prefix"
     }
   }
